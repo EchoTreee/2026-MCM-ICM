@@ -1,0 +1,37 @@
+# ===== LaTeX temporary / build files =====
+*.aux
+*.bbl
+*.bcf
+*.blg
+*.fdb_latexmk
+*.fls
+*.lof
+*.log
+*.lot
+*.out
+*.run.xml
+*.synctex.gz
+*.toc
+
+# ===== Editor / OS noise =====
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# ===== Common large binary artifacts (prevent >100MB uploads) =====
+*.zip
+*.7z
+*.rar
+*.tar
+*.gz
+*.bz2
+*.xz
+*.iso
+*.dmg
+*.mp4
+*.mov
+*.avi
+*.mkv
+*.psd
+*.ai

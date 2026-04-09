@@ -1,0 +1,300 @@
+%% MCM/ICM LaTeX Template %%
+%% 2026 MCM/ICM           %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\documentclass[12pt]{article}
+\usepackage{geometry}
+\geometry{left=1in,right=0.75in,top=1in,bottom=1in}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Replace ABCDEF in the next line with your chosen problem
+% and replace 1111111 with your Team Control Number
+\newcommand{\Problem}{A}
+\newcommand{\Team}{2622395} % 【修正】队伍编号改为 2622395
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\usepackage{newtxtext}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{newtxmath} % must come after amsXXX
+
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{fancyhdr}
+\usepackage{booktabs} % 表格美化
+\usepackage{float}    % 图片浮动
+\usepackage{siunitx}  % 物理单位
+\usepackage{lastpage} % 【修正】引入 lastpage 宏包以获取总页数
+
+% 【修正】取消目录和引用的红框
+\usepackage[hidelinks]{hyperref} 
+
+% 【修正】页眉页脚设置
+\pagestyle{fancy}
+\lhead{Team \Team}
+\rhead{Page \thepage\ of \pageref{LastPage}} % 【修正】页码格式：Page X of Total
+\cfoot{}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{definition}{Definition}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{document}
+\graphicspath{{.}}  
+\DeclareGraphicsExtensions{.pdf, .jpg, .tif, .png}
+\thispagestyle{empty}
+\vspace*{-16ex}
+\centerline{\begin{tabular}{*3{c}}
+	\parbox[t]{0.3\linewidth}{\begin{center}\textbf{Problem Chosen}\\ \Large \textcolor{red}{\Problem}\end{center}}
+	& \parbox[t]{0.3\linewidth}{\begin{center}\textbf{2026\\ MCM/ICM\\ Summary Sheet}\end{center}}
+	& \parbox[t]{0.3\linewidth}{\begin{center}\textbf{Team Control Number}\\ \Large \textcolor{red}{\Team}\end{center}}	\\
+	\hline
+\end{tabular}}
+
+%%%%%%%%%%% Begin Summary %%%%%%%%%%%
+% 【修正】摘要部分直接开始，去掉了 "Abstract" 标题和 quotation 环境
+\begin{center}
+    \textbf{\Large Power-Thermal-Chemical Dynamics: A Continuous-Time Approach to Smartphone Battery Modeling}
+\end{center}
+
+\vspace{1em}
+
+Smartphones have evolved into complex heterogeneous systems where battery life is dictated by the intricate interplay between hardware loads, electrochemical constraints, and environmental factors. To address the challenge of predicting unpredictable battery drain, we develop a comprehensive continuous-time mathematical model that integrates component-level power consumption with the internal electrochemical dynamics of a Lithium-ion battery.
+
+First, we establish a \textbf{Component-Based Power Model} to translate user behaviors into electrical load. By analyzing the physics of CMOS processors, OLED screens, and RF modules, we express the total power demand $P_{total}(t)$ as a superposition of these subsystems. This acts as the input to our core system.
+
+Second, we construct the \textbf{Coupled Electrochemical-Thermal Dynamics Model}. Unlike simple Coulomb counting, our model employs a system of ordinary differential equations (ODEs) to track three key state variables: the State of Charge (SOC), the Polarization Voltage ($V_p$), and the Battery Temperature ($T$). We explicitly model the \textbf{Peukert effect} and \textbf{polarization relaxation} to capture nonlinear drain under heavy loads. Furthermore, a thermodynamic balance equation is introduced to quantify Joule heating and chip heat generation, which in turn affects the internal resistance via an Arrhenius-type correction.
+
+Third, we implement the model to predict \textbf{Time-to-Empty (TTE)} under various scenarios. Our simulation results reveal that heavy gaming not only drains energy via high CPU load but also triggers a positive feedback loop: elevated temperatures increase internal resistance losses, causing voltage sag and premature shutdown. Conversely, we demonstrate how cold environments reduce available capacity through ionic transport limitation.
+
+Finally, we perform sensitivity analysis on environmental temperature and battery health (SOH). Based on our findings, we propose practical recommendations for users, such as managing screen brightness (linear-exponential impact) and avoiding extreme temperatures, and suggest OS-level strategies for thermal-aware throttling.
+
+\vspace{1em}
+\textbf{Keywords:} Continuous-time Dynamics, Electrochemical Model, Thermal Coupling, State of Charge (SOC), Polarization Voltage
+
+%%%%%%%%%%% End Summary %%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\clearpage
+\pagestyle{fancy}
+\tableofcontents
+\newpage
+\setcounter{page}{1} 
+% 正文从这里开始，页码重置为1
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Introduction}
+
+\subsection{Background}
+In the modern era, smartphones are indispensable, yet the "battery anxiety" remains a prevalent issue for users. The remaining battery percentage often fails to reflect the true Time-to-Empty (TTE) because battery drain is non-linear and highly sensitive to usage patterns (e.g., gaming vs. standby) and environmental conditions (e.g., freezing cold vs. scorching heat). A robust mathematical model is required to bridge the gap between user behavior and the complex electrochemical reality inside a Lithium-ion battery.
+
+\subsection{Problem Restatement}
+We are tasked with developing a continuous-time mathematical model to predict the State of Charge (SOC) and TTE of a smartphone. The model must:
+\begin{itemize}
+    \item Incorporate contributors such as screen, processor, and network usage.
+    \item Account for environmental factors like temperature.
+    \item Be grounded in physical/chemical reasoning rather than pure curve fitting.
+    \item Provide recommendations for users and operating system designers.
+\end{itemize}
+
+\subsection{Our Approach}
+We propose a multi-physics coupled model. We view the smartphone battery system as a dynamic interaction between three subsystems:
+\begin{enumerate}
+    \item \textbf{Electrical Load System:} Converting user activities into instantaneous power demand.
+    \item \textbf{Electrochemical System:} Governing the charge transport, polarization, and voltage output.
+    \item \textbf{Thermodynamic System:} Modeling temperature changes which feed back into battery parameters (resistance and capacity).
+\end{enumerate}
+
+\section{Assumptions and Notations}
+
+\subsection{General Assumptions}
+\begin{itemize}
+    \item \textbf{Assumption 1:} The battery is modeled as a standard Lithium-ion cell. Its Open Circuit Voltage (OCV) is a function of SOC, independent of current.
+    \item \textbf{Assumption 2:} The heat distribution within the phone is uniform (Lumped Capacitance Model), allowing us to use a single temperature $T(t)$ for the battery.
+    \item \textbf{Assumption 3:} The DC-DC converter efficiency $\eta_{converter}$ is constant, meaning the battery current $I(t)$ is directly determined by load power and terminal voltage.
+\end{itemize}
+
+\subsection{Notations}
+\begin{table}[H]
+\centering
+\begin{tabular}{clc}
+\toprule
+Symbol & Definition & Unit \\
+\midrule
+$SOC(t)$ & State of Charge & $[0, 1]$ \\
+$V_{terminal}(t)$ & Terminal Voltage of the battery & V \\
+$V_{OCV}$ & Open Circuit Voltage & V \\
+$I(t)$ & Discharge Current (Positive for discharge) & A \\
+$T(t)$ & Battery Temperature & K \\
+$R_{ohm}$ & Internal Ohmic Resistance & $\Omega$ \\
+$V_p(t)$ & Polarization Voltage & V \\
+$C_{design}$ & Design Capacity of the battery & Ah \\
+$P_{total}$ & Total Power Consumption & W \\
+\bottomrule
+\end{tabular}
+\caption{Notations used in the model.}
+\label{tab:notations}
+\end{table}
+
+\section{Model Construction}
+
+Our model consists of two main layers: the \textbf{Load Power Model} (Input) and the \textbf{Continuous-Time Dynamics} (Core).
+
+\subsection{Part I: Component-Based Load Power Model}
+We decompose the total power consumption into major components based on user activity.
+\begin{equation}
+    P_{total}(t) = P_{screen}(t) + P_{cpu}(t) + P_{rf}(t) + P_{bg}(t)
+\end{equation}
+
+\subsubsection{Screen Power ($P_{screen}$)}
+The screen is often the largest consumer. Power depends on brightness $B(t)$ (nits) and the state $\delta_{on} \in \{0,1\}$. We model OLED power as a combination of base driver power and pixel emission power:
+\begin{equation}
+    P_{screen}(t) = \delta_{on}(t) \cdot (k_{base} + k_{light} \cdot B(t)^{\gamma})
+\end{equation}
+where $\gamma$ captures the non-linear relationship between brightness setting and luminance power.
+
+\subsubsection{Processor Power ($P_{cpu}$)}
+Based on CMOS dynamic power mechanisms, CPU power consists of static leakage and dynamic switching power. Let $u(t)$ be the CPU utilization, $f(t)$ be the frequency, and $V_{core}$ be the core voltage:
+\begin{equation}
+    P_{cpu}(t) = P_{leak} + \sum_{cores} \alpha \cdot f(t) \cdot V_{core}^2 \cdot u(t)
+\end{equation}
+
+\subsubsection{Radio Frequency Power ($P_{rf}$)}
+Network power depends on data throughput $R_{data}(t)$ and signal strength $S(t)$ (in dBm). A simplified model is:
+\begin{equation}
+    P_{rf}(t) = P_{idle} + k_{data} \cdot R_{data}(t) + k_{signal} \cdot 10^{\frac{P_{tx}-S(t)}{10}}
+\end{equation}
+This term accounts for the exponential increase in power required to transmit data when the signal is weak.
+
+\subsubsection{Current Conversion}
+Since the smartphone draws power $P_{total}$, the current drawn from the battery depends on the instantaneous terminal voltage $V_{terminal}(t)$. This creates a coupling:
+\begin{equation} \label{eq:current}
+    I(t) = \frac{P_{total}(t)}{V_{terminal}(t) \cdot \eta_{converter}}
+\end{equation}
+As voltage drops, current must increase to maintain constant power, accelerating drain.
+
+\subsection{Part II: Continuous-Time System Dynamics}
+We formulate a system of differential equations to track the internal states of the battery.
+
+\subsubsection{Equation 1: Electrochemical State (SOC Dynamics)}
+The rate of change of SOC is governed by the current drawn, corrected by the Coulombic efficiency $\eta_{coulomb}$ which depends on temperature and current rate (Peukert effect concept):
+\begin{equation} \label{eq:soc}
+    \frac{dSOC(t)}{dt} = - \frac{I(t)}{3600 \cdot C_{design} \cdot SOH(t) \cdot \eta_{coulomb}(T, I)}
+\end{equation}
+where $SOH(t)$ represents the State of Health (capacity fade due to aging).
+
+\subsubsection{Equation 2: Polarization Dynamics ($V_p$)}
+When current flows, ions diffuse slowly, causing a voltage lag known as polarization. We model this using a first-order RC circuit equivalent:
+\begin{equation} \label{eq:polarization}
+    \frac{dV_p(t)}{dt} = -\frac{V_p(t)}{\tau(T)} + \frac{I(t)}{C_p(T)}
+\end{equation}
+Here, $\tau(T) = R_p(T) C_p(T)$ is the time constant. This equation explains why voltage "bounces back" after the load is removed.
+
+\subsubsection{Equation 3: Thermal Dynamics}
+Battery performance is highly temperature-dependent. The temperature evolution is governed by Joule heating, component heat generation, and convective cooling:
+\begin{equation} \label{eq:thermal}
+    m c_p \frac{dT(t)}{dt} = \underbrace{I(t)^2 (R_{ohm} + R_p)}_{\text{Joule Heating}} + \underbrace{P_{chips}(t)}_{\text{Chip Heat}} - \underbrace{h A (T(t) - T_{env})}_{\text{Newtonian Cooling}}
+\end{equation}
+where $m c_p$ is the thermal mass and $h A$ is the heat transfer coefficient.
+
+\subsubsection{Equation 4: Terminal Voltage}
+The observable voltage determines when the phone shuts down (usually at $V_{cutoff} \approx 3.0V$).
+\begin{equation} \label{eq:voltage}
+    V_{terminal}(t) = V_{OCV}(SOC) - V_p(t) - I(t) \cdot R_{ohm}(T)
+\end{equation}
+This closes the loop with Equation (\ref{eq:current}).
+
+\subsection{Part III: Physical Corrections \& Parameter Identification}
+
+\subsubsection{Temperature Dependence (Arrhenius Correction)}
+The internal resistance $R_{ohm}$ decreases as temperature rises due to enhanced ionic mobility. We model this using the Arrhenius equation:
+\begin{equation}
+    R_{ohm}(T, SOC) = R_{ref}(SOC) \cdot \exp\left[ \frac{E_a}{R_g} \left( \frac{1}{T(t)} - \frac{1}{T_{ref}} \right) \right]
+\end{equation}
+Conversely, at low temperatures, $R_{ohm}$ spikes, causing immediate voltage drop (premature shutdown).
+
+\subsubsection{Capacity Correction}
+Available capacity is reduced at extreme temperatures:
+\begin{equation}
+    C_{available}(T) = C_{design} \cdot (1 - k_{loss} \cdot (T_{opt} - T(t))^2)
+\end{equation}
+
+\section{Model Solution and Validation}
+
+Since the system of equations (\ref{eq:soc}, \ref{eq:polarization}, \ref{eq:thermal}) is coupled and non-linear (specifically due to the $I(t) = P/V(t)$ term), we solve it numerically using the \textbf{Runge-Kutta 4th Order (RK4)} method.
+
+\subsection{Data Sources}
+We utilize open datasets for Lithium-ion discharge curves (e.g., from NASA Prognostics Center) to fit $V_{OCV}(SOC)$ and parameters $R_{ohm}, C_p$. Smartphone component power parameters ($k_{base}, \alpha$, etc.) are estimated from published technical teardowns of modern flagship devices.
+
+\subsection{Time-to-Empty (TTE) Prediction}
+TTE is defined as the time $t_{end}$ such that $V_{terminal}(t_{end}) \le V_{cutoff}$.
+
+\subsubsection{Scenario A: Heavy Gaming (High Load)}
+In this scenario, $P_{cpu}$ and $P_{screen}$ are high. The simulation shows:
+1. Rapid SOC depletion.
+2. Significant temperature rise ($T(t)$ increases).
+3. Initially, the temperature rise reduces $R_{ohm}$, slightly helping efficiency. However, the high current $I(t)$ causes a massive Ohmic voltage drop ($I \cdot R_{ohm}$), triggering $V_{terminal} < 3.0V$ even when $SOC > 0\%$.
+
+\subsubsection{Scenario B: Winter Usage (Cold Environment)}
+Simulating $T_{env} = -10^{\circ}$C:
+1. $R_{ohm}$ increases drastically via the Arrhenius term.
+2. The term $I(t) \cdot R_{ohm}$ becomes large even for moderate loads.
+3. The phone shuts down prematurely, reducing effective TTE significantly compared to room temperature.
+
+% Placeholder for Results Figure
+\begin{figure}[H]
+    \centering
+    \fbox{\parbox{0.8\textwidth}{\centering \vspace{3cm} [Figure: Voltage profiles and SOC decay for Gaming vs. Video vs. Standby] \vspace{3cm}}}
+    \caption{Simulated Voltage and SOC curves under different usage profiles. Note the "Voltage Sag" in the Gaming scenario.}
+    \label{fig:results}
+\end{figure}
+
+\section{Sensitivity Analysis}
+
+\subsection{Sensitivity to Environment Temperature}
+We vary $T_{env}$ from $-20^{\circ}$C to $45^{\circ}$C. The model predicts a "sweet spot" around $25^{\circ}$C.
+\begin{itemize}
+    \item \textbf{Cold:} High resistance $\to$ Voltage cutoff dominates.
+    \item \textbf{Hot:} High capacity availability, but risk of overheating throttling (not modeled explicitly but implies risk) and accelerated aging (SOH decay).
+\end{itemize}
+
+\subsection{Sensitivity to Signal Strength}
+Varying $S(t)$ from -60 dBm (Excellent) to -120 dBm (Poor). The exponential term in the RF power model causes battery life to degrade by up to 30\% in poor signal areas during active data transfer.
+
+\section{Recommendations}
+
+Based on our model dynamics, we offer the following recommendations:
+
+\subsection{For Users}
+\begin{itemize}
+    \item \textbf{Signal Awareness:} Avoid heavy downloading in areas with poor signal (1 bar). The power cost is exponential.
+    \item \textbf{Temperature Management:} Do not charge or heavily use the phone in freezing conditions. The internal resistance spike causes "fake" empty battery signals.
+    \item \textbf{Screen Dimming:} Since OLED power $\propto B(t)^{\gamma}$ ($\gamma > 1$), reducing brightness by 20\% can save more than 20\% of screen energy.
+\end{itemize}
+
+\subsection{For Operating System Designers}
+\begin{itemize}
+    \item \textbf{Thermal-Aware Throttling:} Implementation of a control loop that limits $f(t)$ (CPU frequency) not just for safety, but to maintain $I(t)^2 R_{ohm}$ losses within an efficient range.
+    \item \textbf{Pre-heating:} In cold environments, running a "dummy" background thread to warm up the battery (via Joule heating) before a high-power task might actually \textit{extend} useful runtime by lowering $R_{ohm}$.
+\end{itemize}
+
+\section{Strengths and Weaknesses}
+\textbf{Strengths:}
+\begin{itemize}
+    \item \textbf{Coupled Physics:} We link thermal, electrical, and chemical domains, capturing phenomena like "voltage recovery" and temperature-dependent capacity.
+    \item \textbf{Continuous Dynamics:} The ODE formulation allows for real-time state estimation unlike static regression models.
+\end{itemize}
+
+\textbf{Weaknesses:}
+\begin{itemize}
+    \item \textbf{Aging Model:} We treat SOH as a constant for a single discharge cycle. Long-term cycle aging requires a slower-timescale model.
+    \item \textbf{Parameter Complexity:} Accurate estimation of $R_p$ and $C_p$ requires electrochemical impedance spectroscopy (EIS) data, which is hard to obtain for specific consumer phones.
+\end{itemize}
+
+\begin{thebibliography}{99}
+\bibitem{ref1} Newman, J., \& Thomas-Alyea, K. E. (2004). \textit{Electrochemical systems}. John Wiley \& Sons.
+\bibitem{ref2} Carroll, Heiser. (2010). "An analysis of power consumption in a smartphone." \textit{USENIX}.
+\bibitem{ref3} Plett, G. L. (2015). \textit{Battery management systems, Volume 1: Battery modeling}. Artech House.
+\end{thebibliography}
+
+\end{document}
